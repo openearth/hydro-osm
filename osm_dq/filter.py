@@ -10,6 +10,7 @@ import rtree
 import gdal
 import shapely
 import shapely.geometry
+import shapely.wkt
 import numpy as np
 
 from shapely.geometry import (Point, LineString, Polygon, shape, LinearRing,

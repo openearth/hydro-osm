@@ -238,10 +238,12 @@ def run_connectivity_check(options, bbox, logger):
                 )
 
 
-def run_crossings_check(options, bbox, logger):
+def run_crossings_check(options, bbox, logger=logging):
     def get_crossings_check(options, bbox, props={}, logger=logging):
         logger.info('Checking crossings of waterways and highways')
         # make a list of results per filtered bbox
+        # import pdb
+        # pdb.set_trace()
         highways = filter.filter_features(options.osm_fn,
                                    key=options.filter_highway['key'],
                                    value=options.filter_highway['value'],
@@ -281,8 +283,10 @@ def run_crossings_check(options, bbox, logger):
         else:
             bound_filter_key = options.bounds['key'] + '_bound'
             bound_filter_name = bb
-
-        _highways, _waterways, _crossings = get_crossings_check(options, bbox[bb], props={options.bounds['key']: bb}, logger=logger)
+        # _highways, _waterways, _crossings = get_crossings_check(options, bbox[bb], props={options.bounds['key']: bb}, logger=logger)
+        _highways, _waterways, _crossings = get_crossings_check(options, bbox[bb],
+                                                                props={bound_filter_key: bound_filter_name},
+                                                                logger=logger)
         highways += _highways
         waterways += _waterways
         crossings += _crossings
@@ -325,7 +329,7 @@ def run_crossings_check(options, bbox, logger):
                 logger=logger,
                 )
 
-    for n in range(len(waterways)):
+    for n in range(len(highways)):
         highways[n]['properties'] = {key: highways[n]['properties'][key] for key in ['osm_id', options.filter_bridge['key']]}
     io.write_layer(options.report_json_roads,
                 None,
