@@ -6,8 +6,11 @@ import logging
 import copy
 import sys
 import os
+import rtree
 import gdal
-import shapely, shapely.geometry
+import shapely
+import shapely.geometry
+import numpy as np
 
 from shapely.geometry import (Point, LineString, Polygon, shape, LinearRing,
                               MultiLineString, MultiPoint, MultiPolygon, GeometryCollection)
@@ -24,6 +27,16 @@ def toUTM(shape):
         return Polygon(new_coords)
     else:
         raise NotImplementedError('only shapely LineStrings and Polygons have been implemented')
+
+
+def check_Ftype(ftype, value):
+    try:
+        v_out = ftype(value)  # parse
+        if isinstance(v_out, str):
+            v_out = v_out.lower()
+    except:
+        v_out = None
+    return v_out
 
 
 def create_feature(geom, **kwargs):
@@ -64,36 +77,6 @@ def multi2single_geoms(feature):
         features = [feature]
     return features
 
-
-def create_bounds(options, logger=logging):
-    # find the geographical boundaries
-    logger.info('Filtering bounds from {:s}'.format(options.osm_fn))
-    bound_features = filter_features(options.osm_fn,
-                                     key=options.bounds['key'],
-                                     value=options.bounds['value'],
-                                     layer_index=options.bounds['layer_index'],
-                                     wgs2utm=False,
-                                     logger=logger,
-                                     )
-    if len(bound_features) > 1:
-        logger.warning('More than one feature found, preparing a list of results per feature...')
-    elif len(bound_features) == 0:
-        logger.error('No bounding features found with key {:s} and value {:s}'.format(options.bounds['key']))
-        sys.exit(1)
-    else:
-        # filter the all_features to only provide within-bounds
-        logger.info('Found a unique bounding area with key {:s} and value {:s}'.format(options.bounds['key'],
-                                                                             str(options.bounds['value'])))
-    bbox = {}
-    for val in options.bounds['value']:
-        bb = shapely.geometry.MultiPolygon([bound_feature['geometry']
-                                            for bound_feature in bound_features
-                                            if bound_feature['properties'][options.bounds['key']] == val])
-        bbox[val] = bb
-    # bbox = [bound_feature['geometry'] for bound_feature in bound_features]
-    if len(bbox) == 0:
-        bbox = {} # [None]
-    return bbox
 
 
 def filter_features(fn, layer_index=1, bbox=None, key='waterway', value='',
@@ -224,3 +207,4 @@ def filter_features(fn, layer_index=1, bbox=None, key='waterway', value='',
         return [y for x in all_features for y in x]
     else:
         return all_features
+
