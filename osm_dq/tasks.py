@@ -176,13 +176,14 @@ def run_data_model_check(options, bbox, logger=logging):
 
 
 def run_connectivity_check(options, bbox, logger):
+    # import pdb; pdb.set_trace()
     feats = filter.filter_features(options.osm_fn,
                            key=options.filter['key'],
                            value=options.filter['value'],
                            layer_index=options.layer_index,
                            wgs2utm=False,
                            logger=logger,
-                           bbox=bbox,
+                           bbox=None,
                            )
     ## ADD connectivity flag to the model
     logger.info('Checking connectivity of the network')
@@ -192,12 +193,12 @@ def run_connectivity_check(options, bbox, logger):
     }
 
     feats_checked = check.check_data_model(feats,
-                                            check_keys=options.key_types,
-                                            check_ranges=options.key_ranges,
-                                            schema=schema,
-                                            keep_original=True,
-                                            logger=logger,
-                                            )
+                                           check_keys=options.key_types,
+                                           check_ranges=options.key_ranges,
+                                           schema=schema,
+                                           keep_original=True,
+                                           logger=logger,
+                                           )
     prop_with_flags = {}
     for key in options.json_types:
         prop_with_flags[key] = options.json_types[key]
@@ -208,42 +209,33 @@ def run_connectivity_check(options, bbox, logger):
               }
 
     feats_connected = check.check_connectivity(feats_checked,
-                             select_ids = options.connectivity['idx'],
-                             tolerance = float(options.connectivity['tolerance']),
-                             check_keys=options.json_types,
-                             schema=schema)
-
+                                               osm_ids=options.connectivity['idx'],
+                                               tolerance=float(options.connectivity['tolerance']),
+                                               check_keys=options.json_types,
+                                               schema=schema)
     logger.info('Writing filtered and checked data to GeoJSON in {:s}'.format(options.report_json))
-
     props_schema = schema['properties']
-
     props_schema['connected'] = 'int'
     props_schema['endpoints'] = 'int'
-#        print props
-#        print feats_checked[0]
-
     schema = {
-          'geometry': options.layer_type,
-          'properties': props_schema,
-    }
-
+              'geometry': options.layer_type,
+              'properties': props_schema,
+              }
     io.write_layer(options.report_json,
-                None,
-                feats_connected,
-                format='GeoJSON',
-                write_mode='w',
-                crs=fiona.crs.from_epsg(4326),
-                schema=schema,
-                logger=logger,
-                )
+                   None,
+                   feats_connected,
+                   format='GeoJSON',
+                   write_mode='w',
+                   crs=fiona.crs.from_epsg(4326),
+                   schema=schema,
+                   logger=logger,
+                   )
 
 
 def run_crossings_check(options, bbox, logger=logging):
     def get_crossings_check(options, bbox, props={}, logger=logging):
         logger.info('Checking crossings of waterways and highways')
         # make a list of results per filtered bbox
-        # import pdb
-        # pdb.set_trace()
         highways = filter.filter_features(options.osm_fn,
                                    key=options.filter_highway['key'],
                                    value=options.filter_highway['value'],

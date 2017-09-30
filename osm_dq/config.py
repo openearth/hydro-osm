@@ -133,7 +133,7 @@ def add_ini(options, logger=logging):
         options.connectivity['idx'] = configget(config, 'connectivity_options', 'selected_id', 'list')
         options.connectivity['tolerance'] = configget(config, 'connectivity_options', 'tolerance', '', 'float')
 
-    if options.check == 'data_model':
+    if (options.check == 'data_model' or options.check == 'connectivity'):
         options.filter = options_add_filter(config, 'filter')
         options.key_types = {}
         options.json_types = {}
