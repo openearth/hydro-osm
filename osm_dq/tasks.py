@@ -17,6 +17,7 @@ import filter
 import io
 import check
 
+
 def get_osm_data(options, logger=logging):
     # prepare domain
     domain = shapely.geometry.Polygon([(options.xmin, options.ymax),
@@ -176,7 +177,6 @@ def run_data_model_check(options, bbox, logger=logging):
 
 
 def run_connectivity_check(options, bbox, logger):
-    # import pdb; pdb.set_trace()
     feats = filter.filter_features(options.osm_fn,
                            key=options.filter['key'],
                            value=options.filter['value'],
@@ -185,13 +185,12 @@ def run_connectivity_check(options, bbox, logger):
                            logger=logger,
                            bbox=None,
                            )
-    ## ADD connectivity flag to the model
+    # add connectivity flag to the model
     logger.info('Checking connectivity of the network')
     schema = {
               'geometry': options.layer_type,
               'properties': options.json_types
     }
-
     feats_checked = check.check_data_model(feats,
                                            check_keys=options.key_types,
                                            check_ranges=options.key_ranges,
@@ -207,7 +206,6 @@ def run_connectivity_check(options, bbox, logger):
               'geometry': options.layer_type,
               'properties': prop_with_flags,
               }
-
     feats_connected = check.check_connectivity(feats_checked,
                                                osm_ids=options.connectivity['idx'],
                                                tolerance=float(options.connectivity['tolerance']),
@@ -230,7 +228,6 @@ def run_connectivity_check(options, bbox, logger):
                    schema=schema,
                    logger=logger,
                    )
-
 
 def run_crossings_check(options, bbox, logger=logging):
     def get_crossings_check(options, bbox, props={}, logger=logging):
