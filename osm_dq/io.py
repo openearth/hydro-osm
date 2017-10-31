@@ -2,6 +2,7 @@
 I/O functions
 """
 import os
+import sys
 import logging
 import numpy as np
 import fiona
@@ -9,6 +10,9 @@ import shapely
 
 from fiona import crs
 from urllib2 import urlopen
+
+def get_script_path():
+    return os.path.dirname(os.path.realpath(sys.argv[0]))
 
 
 def write_layer(db, layer_name, data, write_mode='w', format='ESRI Shapefile', schema=None, crs=crs.from_epsg(4326), logger=logging):

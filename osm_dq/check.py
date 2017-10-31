@@ -141,7 +141,7 @@ def check_data_model(feats, check_keys={}, check_ranges={}, schema=None,
     return feats_checked
 
 
-def check_connectivity(feats, osm_ids=[], tolerance=0.0001, check_keys={}, check_ranges={}, logger=logging,schema=None):
+def check_connectivity(feats, key, values=[], tolerance=0.0001, check_keys={}, check_ranges={}, logger=logging,schema=None):
     """
     checks the connectivity of all features in list "feats". Connected features are given the same connected_id, based on the
     initialy selected feature.
@@ -171,12 +171,11 @@ def check_connectivity(feats, osm_ids=[], tolerance=0.0001, check_keys={}, check
         feat['properties']['endpoints'] = 0
 
     # Make a list of the selected elements, for which we need to check the connectivity
-    select_ids = [idx for idx in np.arange(0,len(feats_)) if feats_[idx]['properties']['osm_id'] in osm_ids]
-
+    select_ids = [idx for idx in np.arange(0, len(feats_)) if str(feats_[idx]['properties'][key]) in values]
     # Now start the actual check, looping over the selected elements
     for select_id in select_ids:
         # First set the properties of the selected elements
-        feats_[int(select_id)]['properties']['connected'] = feats_[select_id]['properties']['osm_id']
+        feats_[int(select_id)]['properties']['connected'] = feats_[select_id]['properties'][key]
         feats_[int(select_id)]['properties']['endpoints'] = 2
         to_check = 1
         endpoints_list = [select_id]
@@ -191,14 +190,14 @@ def check_connectivity(feats, osm_ids=[], tolerance=0.0001, check_keys={}, check
                         feats_[i]['properties']['endpoints'] = feats_[i]['properties']['endpoints'] - 1
 
                     # Check if element is not itself, to overcome the issue of endless loop.
-                    if feats_[i]['properties']['connected'] != feats_[select_id]['properties']['osm_id']:
+                    if feats_[i]['properties']['connected'] != feats_[select_id]['properties'][key]:
                         ## Now check is elements are disjoint. If disjoint, continue to the next step.
                         if feats_[i]['geometry'].disjoint(feats_[int(endpoint_id)]['geometry'].buffer(tolerance)):
                             continue
                         else:
                             # If elements are not disjoint, change the properties and add element to the "connected" list.
                             feats_[i]['properties']['endpoints'] = 15
-                            feats_[i]['properties']['connected'] = feats_[select_id]['properties']['osm_id']
+                            feats_[i]['properties']['connected'] = feats_[select_id]['properties'][key]
 
             endpoints_list = [j for j, feat in enumerate(feats_) if feat['properties']['endpoints'] > 0]
             to_check = len(endpoints_list)

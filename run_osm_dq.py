@@ -32,26 +32,33 @@ from osm_dq import config
 from osm_dq import log
 from osm_dq import tasks
 
+
 def main():
     options, logger, ch = config.create_options()
-    ## OSM DOWNLOAD
+
+    # download openstreetmap data
     if options.osm_download:
         tasks.get_osm_data(options, logger=logger)
+
     # filter geographical bounds (if provided)
     if options.bounds:
         bbox = tasks.get_bounds(options, logger=logger)
     else:
         bbox = {'full_area': None}
+
     # checking data model
     if options.check == 'data_model':
         tasks.run_data_model_check(options, bbox, logger)
 
-    if options.check =='connectivity':
+    # check connectivity
+    if options.check == 'connectivity':
         tasks.run_connectivity_check(options, bbox, logger)
 
+    # check crossings of waterways and roads
     if options.check == 'crossings':
         tasks.run_crossings_check(options, bbox, logger)
 
+    # close logger object
     logger, ch = log.close_logger(logger, ch)
     del logger, ch
     sys.exit(0)
