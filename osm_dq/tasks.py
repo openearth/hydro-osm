@@ -41,6 +41,7 @@ def get_bounds(options, logger=logging):
     # find the geographical boundaries
     logger.info('Filtering bounds from {:s}'.format(options.osm_fn))
     bound_features = filter.filter_features(options.osm_fn,
+                                     osm_config=options.osm_config,
                                      key=options.bounds['key'],
                                      value=options.bounds['value'],
                                      layer_index=options.bounds['layer_index'],
@@ -89,6 +90,7 @@ def run_data_model_check(options, bbox, logger=logging):
         logger.info('Filtering features from {:s}'.format(options.osm_fn))
         logger.info('Using key: {:s} and value: {:s}'.format(options.filter['key'], str(options.filter['value'])))
         all_features = filter.filter_features(options.osm_fn,
+                                       osm_config=options.osm_config,
                                        key=options.filter['key'],
                                        value=options.filter['value'],
                                        layer_index=options.layer_index,
@@ -178,6 +180,7 @@ def run_data_model_check(options, bbox, logger=logging):
 
 def run_connectivity_check(options, bbox, logger):
     feats = filter.filter_features(options.osm_fn,
+                           osm_config=options.osm_config,
                            key=options.filter['key'],
                            value=options.filter['value'],
                            layer_index=options.layer_index,
@@ -207,7 +210,8 @@ def run_connectivity_check(options, bbox, logger):
               'properties': prop_with_flags,
               }
     feats_connected = check.check_connectivity(feats_checked,
-                                               osm_ids=options.connectivity['idx'],
+                                               key=options.connectivity['key'],
+                                               values=options.connectivity['value'],
                                                tolerance=float(options.connectivity['tolerance']),
                                                check_keys=options.json_types,
                                                schema=schema)
@@ -234,6 +238,7 @@ def run_crossings_check(options, bbox, logger=logging):
         logger.info('Checking crossings of waterways and highways')
         # make a list of results per filtered bbox
         highways = filter.filter_features(options.osm_fn,
+                                   osm_config=options.osm_config,
                                    key=options.filter_highway['key'],
                                    value=options.filter_highway['value'],
                                    layer_index=1,
@@ -242,6 +247,7 @@ def run_crossings_check(options, bbox, logger=logging):
                                    bbox=bbox,
                                    )
         waterways = filter.filter_features(options.osm_fn,
+                                    osm_config=options.osm_config,
                                     key=options.filter['key'],
                                     value=options.filter['value'],  # these should be the waterways
                                     layer_index=1,

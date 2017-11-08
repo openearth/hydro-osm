@@ -17,6 +17,7 @@ from configobj import ConfigObj
 
 # package components
 import log
+import io
 
 
 def create_options():
@@ -38,6 +39,8 @@ def create_options():
 
     # file names and directory bookkeeping
     options.dest_path = os.path.abspath(options.dest_path)
+    options.code_path = io.get_script_path()
+    options.osm_config = os.path.join(options.code_path, 'osmconf_osm2dh.ini')
     logfilename = os.path.join(options.dest_path, 'osm_validation.log')
     # create dir if not exist
     if not os.path.isdir(options.dest_path):
@@ -78,19 +81,10 @@ def create_parser():
     parser.add_option('-i', '--ini', dest='inifile',
                       default='osm2dhydro.ini', nargs=1,
                       help='ini configuration file')
-    parser.add_option('-g', '--graph',
-                      dest='plot_validation', default=False, action='store_true',
-                      help='make graphs of validation flags (default False)')
-    parser.add_option('-P', '--popup',
-                      dest='popup', default=False, action='store_true',
-                      help='add popups to the map (default False)')
     parser.add_option('-c', '--check', type='choice', action='store',
                       dest='check', choices=['data_model', 'connectivity', 'crossings'],
                       default=None,
                       help='which check to perform, can be: data_model, connectivity, crossings')
-    # parser.add_option('-m', '--data_model',
-    #                   dest='check_data_model', default=False, action='store_true',
-    #                   help='check for data model (default False)')
     parser.add_option('-d', '--destination',
                       dest='dest_path', default='',
                       help='Destination folder for reporting')
@@ -129,9 +123,10 @@ def add_ini(options, logger=logging):
         options.filter_tunnel = options_add_filter(config, 'filter_tunnel')
 
     if options.check == 'connectivity':
-        options.connectivity = {}
-        options.connectivity['idx'] = configget(config, 'connectivity_options', 'selected_id', 'list')
-        options.connectivity['tolerance'] = configget(config, 'connectivity_options', 'tolerance', '', 'float')
+        options.connectivity = options_add_filter(config, 'connectivity')
+        # options.connectivity = {}
+        # options.connectivity['idx'] = configget(config, 'connectivity', 'selected_id', 'list')
+        options.connectivity['tolerance'] = configget(config, 'connectivity', 'tolerance', '', 'float')
 
     if (options.check == 'data_model' or options.check == 'connectivity'):
         options.filter = options_add_filter(config, 'filter')

@@ -80,7 +80,7 @@ def multi2single_geoms(feature):
 
 
 
-def filter_features(fn, layer_index=1, bbox=None, key='waterway', value='',
+def filter_features(fn, layer_index=1, osm_config=None, bbox=None, key='waterway', value='',
                     split_multigeoms=True, flatten=True, wgs2utm=True, logger=logging):
     """
     Filters out objects from a geo database (E.g. SQLite or OSM file) and a specified layer using key value pairs
@@ -160,15 +160,21 @@ def filter_features(fn, layer_index=1, bbox=None, key='waterway', value='',
     # check if dataset is of OpenStreetMap format
     osm_driver = _check_osm(fn)
     # read data
-    if osm_driver:
-        src_ds = gdal.OpenEx(fn, open_options=['CONFIG_FILE=osmconf_osm2dh.ini'])
+
+    if osm_driver and (osm_config is not None):
+        src_ds = gdal.OpenEx(fn, open_options=['CONFIG_FILE={:s}'.format(osm_config)])
+        src_lyr = src_ds.GetLayerByIndex(layer_index)
     else:
         # assume the file can be read by any other driver
         src_ds = gdal.OpenEx(fn)
-    src_lyr = src_ds.GetLayerByIndex(layer_index)
+        src_lyr = src_ds.GetLayer()
     all_features = [[]]*len(bbox)
     # features = []  # output is list of features
     for n, feat in enumerate(src_lyr):
+        if feat.GetGeometryRef() is None:
+            logger.error('Feature {:d} contains NULL geometry, please check this in input file'.format(n))
+            continue
+
         geom = shapely.wkt.loads(feat.GetGeometryRef().ExportToWkt())
         if wgs2utm:
             geom = toUTM(geom)
