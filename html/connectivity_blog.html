@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset='utf-8' />
-    <title>Ramani Huria data model QA</title>
+    <title>Ramani Huria connectivity QA</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.41.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.41.0/mapbox-gl.css' rel='stylesheet' />
@@ -74,28 +74,14 @@
 
 <div id="map"></div>
 <div id='console'>
-  <h1>Ramani Huria drainage data model flags</h1>
+  <h1>Ramani Huria drainage connectivity</h1>
   <p>Data: <a href='http://www.openstreetmap.org/' target='_blank'>OpenStreetMap</a>
     collected by <a href='http://www.ramanihuria.org/' target='_blank'>Ramani Huria</a></p>
-  <div class='flag'>
-    <div class='row' id='flag'>
-      <input id='depth' type='radio' name='toggle' value='depth_flag' checked='checked'>
-      <label for='depth'>depth</label>
-      <input id='width' type='radio' name='toggle' value='width_flag'>
-      <label for='width'>width</label>
-      <input id='diameter' type='radio' name='toggle' value='diameter_flag'>
-      <label for='diameter'>diameter</label>
-      <input id='blockage' type='radio' name='toggle' value='blockage_flag'>
-      <label for='blockage'>blockage</label>
-    </div>
-  </div>
 </div>
 <div id='flag-legend' class='legend'>
     <h4>Flag</h4>
-    <div><span style='background-color: #00FF00'></span>correct</div>
-    <div><span style='background-color: #FFFF55'></span>invalid value</div>
-    <div><span style='background-color: #FFAA00'></span>invalid type</div>
-    <div><span style='background-color: #FF0000'></span>no value</div>
+    <div><span style='background-color: #00FF00'></span>connected</div>
+    <div><span style='background-color: #FF0000'></span>unconnected</div>
 </div>
 
 
@@ -107,21 +93,21 @@ var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/light-v9',
     //style: 'mapbox://styles/hcwinsemius/cj9f8j9zp8n8v2sn7942eyppd',
-    zoom: 11,
-    center: [39.224910, -6.785186]
+    zoom: 17,
+    center: [39.2251, -6.8456]
 });
 
 map.on('load', function () {
-    map.addSource('data_model', {
+    map.addSource('connectivity', {
         type: 'vector',
-        url: 'mapbox://hcwinsemius.cp6smzru'
+        url: 'mapbox://hcwinsemius.2b6c7sn6'
     });
     // add background with low opacity and thick lines
     map.addLayer({
         'id': 'background',
         'type': 'line',
-        'source': 'data_model',
-        'source-layer': 'data_model_channels_geo-7k9cvq',
+        'source': 'connectivity',
+        'source-layer': 'connectivity_geo-a836n6',
         'layout': {
             'visibility': 'visible',
             'line-join': 'round',
@@ -135,10 +121,10 @@ map.on('load', function () {
     });
 
     map.addLayer({
-        'id': 'data_model',
+        'id': 'connectivity',
         'type': 'line',
-        'source': 'data_model',
-        'source-layer': 'data_model_channels_geo-7k9cvq',
+        'source': 'connectivity',
+        'source-layer': 'connectivity_geo-a836n6',
         'layout': {
             'visibility': 'visible',
             'line-join': 'round',
@@ -147,29 +133,14 @@ map.on('load', function () {
 
         'paint': {
             'line-color': {
-                property: 'depth_flag',
+                property: 'connected',
                 stops: [
-                    [0, '#00FF00'],
-                    [1, '#FFFF00'],
-                    [2, '#FFAA00'],
-                    [3, '#FF0000']
+                    [0, '#FF0000'],
+                    [1, '#00FF00']
                 ]
             },
             'line-width': 2
         }
-    });
-
-    document.getElementById('flag').addEventListener('change', function(e) {
-      var prop_flag = e.target.value;
-      map.setPaintProperty('data_model', 'line-color', {
-        property: prop_flag,
-        stops: [
-          [0, '#00FF00'],
-          [1, '#FFFF00'],
-          [2, '#FFAA00'],
-          [3, '#FF0000']
-        ]
-      });
     });
 });
 // Add zoom and rotation controls to the map.
