@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Ramani Huria data model QA</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.41.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.41.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Helvetica Neue', Helvetica, Arial, Sans-serif;
+    }
+
+    h1 {
+      font-size: 14px;
+      line-height: 20px;
+    }
+
+    h2 {
+      font-size: 14px;
+      line-height: 20px;
+      margin-bottom: 10px;
+    }
+
+    a {
+      text-decoration: none;
+      color: #2dc4b2;
+    }
+
+    #console {
+      position: absolute;
+      width: 280px;
+      margin: 10px;
+      padding: 10px 20px;
+      left: 10px;
+      background-color: white;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.10);
+      font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    }
+    .legend {
+        background-color: #fff;
+        border-radius: 3px;
+        bottom: 30px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.10);
+        font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        padding: 10px;
+        position: absolute;
+        right: 10px;
+        z-index: 1;
+    }
+
+    .legend h4 {
+        margin: 0 0 10px;
+    }
+
+    .legend div span {
+        border-radius: 50%;
+        display: inline-block;
+        height: 10px;
+        margin-right: 5px;
+        width: 10px;
+    }
+
+</style>
+
+<div id="map"></div>
+<div id='console'>
+  <h1>Ramani Huria drainage data model flags</h1>
+  <p>Data: <a href='http://www.openstreetmap.org/' target='_blank'>OpenStreetMap</a>
+    collected by <a href='http://www.ramanihuria.org/' target='_blank'>Ramani Huria</a></p>
+  <div class='flag'>
+    <div class='row' id='flag'>
+      <input id='depth' type='radio' name='toggle' value='depth_flag' checked='checked'>
+      <label for='depth'>depth</label>
+      <input id='width' type='radio' name='toggle' value='width_flag'>
+      <label for='width'>width</label>
+      <input id='diameter' type='radio' name='toggle' value='diameter_flag'>
+      <label for='diameter'>diameter</label>
+      <input id='blockage' type='radio' name='toggle' value='blockage_flag'>
+      <label for='blockage'>blockage</label>
+    </div>
+  </div>
+</div>
+<div id='flag-legend' class='legend'>
+    <h4>Flag</h4>
+    <div><span style='background-color: #00FF00'></span>correct</div>
+    <div><span style='background-color: #FFFF55'></span>invalid value</div>
+    <div><span style='background-color: #FFAA00'></span>invalid type</div>
+    <div><span style='background-color: #FF0000'></span>no value</div>
+</div>
+
+
+<!-- <nav id="menu"></nav> -->
+
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiaGN3aW5zZW1pdXMiLCJhIjoiY2l2MHd3aDN4MDA0OTJ6dDU2Y2F6MWk0dCJ9.mLH0b46r4cHNdb1w9-dLcQ';
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/light-v9',
+    //style: 'mapbox://styles/hcwinsemius/cj9f8j9zp8n8v2sn7942eyppd',
+    zoom: 11,
+    center: [39.224910, -6.785186]
+});
+
+map.on('load', function () {
+    map.addSource('data_model', {
+        type: 'vector',
+        url: 'mapbox://hcwinsemius.cp6smzru'
+    });
+    // add background with low opacity and thick lines
+    map.addLayer({
+        'id': 'background',
+        'type': 'line',
+        'source': 'data_model',
+        'source-layer': 'data_model_channels_geo-7k9cvq',
+        'layout': {
+            'visibility': 'visible',
+            'line-join': 'round',
+            'line-cap': 'round'
+        },
+         'paint': {
+             'line-color': '#000000',
+             'line-width': 4,
+             'line-opacity': 0.5
+         }
+    });
+
+    map.addLayer({
+        'id': 'data_model',
+        'type': 'line',
+        'source': 'data_model',
+        'source-layer': 'data_model_channels_geo-7k9cvq',
+        'layout': {
+            'visibility': 'visible',
+            'line-join': 'round',
+            'line-cap': 'round',
+        },
+
+        'paint': {
+            'line-color': {
+                property: 'depth_flag',
+                stops: [
+                    [0, '#00FF00'],
+                    [1, '#FFFF00'],
+                    [2, '#FFAA00'],
+                    [3, '#FF0000']
+                ]
+            },
+            'line-width': 2
+        }
+    });
+
+    document.getElementById('flag').addEventListener('change', function(e) {
+      var prop_flag = e.target.value;
+      map.setPaintProperty('data_model', 'line-color', {
+        property: prop_flag,
+        stops: [
+          [0, '#00FF00'],
+          [1, '#FFFF00'],
+          [2, '#FFAA00'],
+          [3, '#FF0000']
+        ]
+      });
+    });
+});
+// Add zoom and rotation controls to the map.
+map.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
+
+</script>
+</body>
+</html>
