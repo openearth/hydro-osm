@@ -56,7 +56,6 @@ def add_properties(feature, missing_value='', **kwargs):
             feature['properties'][key] = missing_value
     return feature
 
-
 def multi2single_geoms(feature):
     # make separate data object for each geometry in multi geometry
     features = []

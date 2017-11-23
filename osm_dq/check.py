@@ -107,7 +107,6 @@ def check_data_model(feats, check_keys={}, check_ranges={}, schema=None,
         return v_checked, flag
 
     feats_checked = []
-
     for feat in feats:
         if schema is not None:
             props_schema = schema['properties']
@@ -122,6 +121,8 @@ def check_data_model(feats, check_keys={}, check_ranges={}, schema=None,
         for key in global_props:
             props[key] = global_props[key]
         for key in props_schema:
+            # TODO: insert a check on conditionals before doing the actual check, if conditions not met, check not necessary
+
             try:
                 v = feat['properties'][key]
             except:

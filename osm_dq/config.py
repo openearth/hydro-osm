@@ -102,6 +102,7 @@ def add_ini(options, logger=logging):
     config = ConfigObj(options.inifile)
     # read settings
     options.osm_fn = configget(config, 'input_data', 'osm_file', None)
+    options.odk_fn = configget(config, 'input_data', 'odk_config_file', None)
     if options.osm_fn is None:
         raise ValueError('OSM file name not found in ini file, check [input_data] -> osm_file')
     options.layer_index = configget(config, 'input_data', 'layer_index', 1, 'int')
@@ -130,26 +131,35 @@ def add_ini(options, logger=logging):
 
     if (options.check == 'data_model' or options.check == 'connectivity'):
         options.filter = options_add_filter(config, 'filter')
-        options.key_types = {}
-        options.json_types = {}
-        options.key_ranges = {}
-        for key in config['key_types']:
-            options.key_types[key] = eval(configget(config, 'key_types', key, '', 'str'))
-            options.json_types[key] = configget(config, 'key_types', key, '', 'str')
+        # with and ODK file, data model is read from odf, otherwise it is read from .ini file
+        if options.odk_fn is None:
+            # read the config of the data model from the .ini file
+            options.key_types = {}
+            options.json_types = {}
+            options.key_ranges = {}
+            for key in config['key_types']:
+                options.key_types[key] = eval(configget(config, 'key_types', key, '', 'str'))
+                options.json_types[key] = configget(config, 'key_types', key, '', 'str')
+            # now parse the allowed values, check if these need to be converted to a certain data type
+            for key in config['key_ranges']:
+                # check datatype
+                if key in options.key_types:
+                    dtype_str = options.key_types[key].__name__
+                else:
+                    # assume datatype can be string
+                    dtype_str = 'str'
 
-        # now parse the allowed values, check if these need to be converted to a certain data type
-        for key in config['key_ranges']:
-            # check datatype
-            if key in options.key_types:
-                dtype_str = options.key_types[key].__name__
-            else:
-                # assume datatype can be string
-                dtype_str = 'str'
+                options.key_ranges[key] = configget_list(config, 'key_ranges', key, dtype=dtype_str)
+                if (dtype_str == 'float') & (len(options.key_ranges[key]) != 2):
+                    logger.error('key "{:s}" of type "{:s}" should have 2 range values in key_ranges section (min and max)'.format(key, dtype_str))
+                    sys.exit(1)
+            options.conditions = []  # TODO: also allow for conditionals in .ini file configuration
+        else:
+            # read from ODK file
+            data_model = io.read_odk_data_model(options.odk_fn)
+            options.key_types, options.json_types = io.get_datatypes(data_model, tag_name='nodeset', data_type='type')
+            options.conditions = io.get_conditions(data_model)
 
-            options.key_ranges[key] = configget_list(config, 'key_ranges', key, dtype=dtype_str)
-            if (dtype_str == 'float') & (len(options.key_ranges[key]) != 2):
-                logger.error('key "{:s}" of type "{:s}" should have 2 range values in key_ranges section (min and max)'.format(key, dtype_str))
-                sys.exit(1)
     # make some more option entries based on path and model name
     options.gis_path = os.path.join(options.dest_path, 'gis_files')
     options.report_path = os.path.join(options.dest_path, 'report_files')
