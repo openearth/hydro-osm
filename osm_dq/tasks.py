@@ -109,6 +109,7 @@ def run_data_model_check(options, bbox, logger=logging):
         feats_checked = check.check_data_model(all_features,
                                          check_keys=options.key_types,
                                          check_ranges=options.key_ranges,
+                                         check_conditions=options.conditions,
                                          schema=schema,
                                          keep_original=True,
                                          global_props=global_props,

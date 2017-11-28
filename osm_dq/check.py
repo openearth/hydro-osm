@@ -11,7 +11,7 @@ import numpy as np
 import filter
 
 
-def check_data_model(feats, check_keys={}, check_ranges={}, schema=None,
+def check_data_model(feats, check_keys={}, check_ranges={}, check_conditions=[], schema=None,
                      keep_original=False, flag_suffix='_flag', global_props={}, logger=logging):
     """
     checks all features in list "feats" for compliancy with a data model
@@ -20,6 +20,7 @@ def check_data_model(feats, check_keys={}, check_ranges={}, schema=None,
         feats: list of JSON-type features (with 'geometry' and 'properties')
         check_keys={}: dictionary of keys with datatypes
         check_ranges={}: dictionary of keys with values
+        check_conditions={}: dictionary of conditions to be met before checking is required
         schema=None: fiona schema that should be followed. If None, then schema is copied from features and all keys are copied
         keep_original=False: if set to True, the values (read as string) will be converted to their mandated key type
         flag_suffix='_flag': suffix to use for keys showing the flag value
@@ -107,7 +108,7 @@ def check_data_model(feats, check_keys={}, check_ranges={}, schema=None,
         return v_checked, flag
 
     feats_checked = []
-    for feat in feats:
+    for n, feat in enumerate(feats):
         if schema is not None:
             props_schema = schema['properties']
         else:
@@ -115,28 +116,48 @@ def check_data_model(feats, check_keys={}, check_ranges={}, schema=None,
             for key in feat['properties']:
                 props_schema[key] = type(feat['properties'][key]).__name__
 
-    # set field values based on field in scheme
+                # set field values based on field in scheme
         props = {}
         # add any properties in global_props (usually the name of bounding box area
         for key in global_props:
             props[key] = global_props[key]
-        for key in props_schema:
-            # TODO: insert a check on conditionals before doing the actual check, if conditions not met, check not necessary
 
+        for key in props_schema:
+            # name of the flag tag
+            key_flag = key + flag_suffix
+            # determine conditional statements
+            if check_conditions.has_key(key):
+                # check if conditions are met
+                logical_and = check_conditions[key]['logical_and']
+                conditions_list = []
+                for cond_key, cond_value in check_conditions[key]['conditions']:
+                    # check if condition is met
+                    conditions_list.append(feat['properties'][cond_key] == cond_value)
+                # now check if conditions are met
+                if logical_and == True:
+                    conditions_met = np.all(conditions_list)
+                else:
+                    conditions_met = np.any(conditions_list)
+            else:
+                conditions_met = True
             try:
                 v = feat['properties'][key]
             except:
                 v = None
                 pass
-            key_flag = key + flag_suffix
-            v_check, v_flag = _flag_data_model(check_keys, check_ranges, key, v)
-            props[key] = v
-            if v_flag is not None:
-                # key is within data model (else, don't use key)
-                if not(keep_original):
-                    props[key] = v_check
-                props[key_flag] = v_flag
+            if conditions_met:
+                v_check, v_flag = _flag_data_model(check_keys, check_ranges, key, v)
+                props[key] = v
+                if v_flag is not None:
+                    # key is within data model (else, don't use key)
+                    if not (keep_original):
+                        props[key] = v_check
+                    props[key_flag] = v_flag
+            else:
+                props[key] = v
+                props[key_flag] = None  # None means N/A
         # make a new features
+
         feat_checked = filter.create_feature(feat['geometry'], missing_value=None, **props)
         feats_checked.append(feat_checked)
     return feats_checked
