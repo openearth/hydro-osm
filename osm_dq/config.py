@@ -111,7 +111,7 @@ def add_ini(options, logger=logging):
     options.xmax = configget(config, 'input_data', 'xmax', None, 'float')
     options.ymin = configget(config, 'input_data', 'ymin', None, 'float')
     options.ymax = configget(config, 'input_data', 'ymax', None, 'float')
-
+    options.tag_length = configget(config, 'input_data', 'tag_length', None, 'int')
     if 'bounds' in config:
         options.bounds = options_add_filter(config, 'bounds')
     else:
@@ -145,8 +145,13 @@ def add_ini(options, logger=logging):
         else:
             # read from ODK file
             data_model = io.read_odk_data_model(options.odk_fn)
-            options.key_types, options.json_types = io.get_datatypes(data_model, tag_name='nodeset', data_type='type')
-            options.conditions = io.get_conditions(data_model)
+            options.key_types, options.json_types = io.get_datatypes(data_model,
+                                                                     tag_name='nodeset',
+                                                                     data_type='type',
+                                                                     max_str=options.tag_length
+                                                                     )
+            options.conditions = io.get_conditions(data_model,
+                                                   max_str=options.tag_length)
         for key in config['key_ranges']:
             # check datatype
             if key in options.key_types:

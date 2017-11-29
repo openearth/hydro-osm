@@ -96,7 +96,7 @@ def download_overpass(fn,
         f.write(response.read())
     return
 
-def get_datatypes(xml_data_model, tag_name='nodeset', data_type='type', max_str=10):
+def get_datatypes(xml_data_model, tag_name='nodeset', data_type='type', max_str=None):
     """
 
     :param xml_data_model: data model list read from ODK config (read_odk_data_model)
@@ -129,7 +129,7 @@ def get_datatypes(xml_data_model, tag_name='nodeset', data_type='type', max_str=
     return check_keys, check_json
 
 
-def get_conditions(xml_data_model, tag_name='nodeset', conditions='relevant',max_str=10):
+def get_conditions(xml_data_model, tag_name='nodeset', conditions='relevant', max_str=10):
     """
     Get the conditional tag values that should be met before the tag under consideration should be checked
     :param xml_data_model: data model list read from ODK config (read_odk_data_model)
