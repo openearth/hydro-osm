@@ -171,10 +171,18 @@ def filter_features(fn, layer_index=1, osm_config=None, bbox=None, key='waterway
     # features = []  # output is list of features
     for n, feat in enumerate(src_lyr):
         if feat.GetGeometryRef() is None:
-            logger.error('Feature {:d} contains NULL geometry, please check this in input file'.format(n))
+            logger.warning('Feature {:d} contains NULL geometry, please check this in input file'.format(n + 1))
             continue
-
-        geom = shapely.wkt.loads(feat.GetGeometryRef().ExportToWkt())
+        feat_geom = feat.GetGeometryRef()
+        # print feat_geom.GetPointCount()
+        if feat_geom.GetPointCount() == 0:
+            logger.warning('Feature {:d} contains geometry of zero points, please check this in input file'.format(n + 1))
+            continue
+        try:
+            geom = shapely.wkt.loads(feat_geom.ExportToWkt())
+        except:
+            logger.warning('Feature {:d}: cannot make geometry from {:d} vertices. Please check this in input file'. format(n + 1, feat_geom.GetPointCount()))
+            continue
         if wgs2utm:
             geom = toUTM(geom)
         # check if feature is completely outside domain (if so, discard)
