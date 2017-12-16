@@ -16,7 +16,7 @@ import fiona
 import filter
 import io
 import check
-
+import copy
 
 def get_osm_data(options, logger=logging):
     # prepare domain
@@ -113,6 +113,7 @@ def run_data_model_check(options, bbox, logger=logging):
                                          schema=schema,
                                          keep_original=True,
                                          global_props=global_props,
+                                         add_props=options.add_props,
                                          logger=logger,
                                          )
 
@@ -122,6 +123,7 @@ def run_data_model_check(options, bbox, logger=logging):
               'geometry': options.layer_type,
               'properties': options.json_types
     }
+    # TODO get validation report in separate function
     feats_checked = []
     validation_report = {}
     for bb in bbox:
@@ -159,6 +161,9 @@ def run_data_model_check(options, bbox, logger=logging):
                   'geometry': options.layer_type,
                   'properties': prop_with_flags,
                   }
+    # add the additional properties
+    schema_flag['properties'].update(options.add_props)
+
     io.write_layer(options.report_json,
                 None,
                 feats_checked,

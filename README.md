@@ -11,7 +11,7 @@ It provides three quality checks
 - checking crossings of waterways and roads
 
 ## General run time information
-the data quality routines are run through the python code ```run_osm_dq.py``` (see run_osm_dq.sh](https://github.com/openearth/hydro-osm/blob/master/run_osm_dq.py)).
+the data quality routines are run through the python code ```run_osm_dq.py``` (see [run_osm_dq.sh](https://github.com/openearth/hydro-osm/blob/master/run_osm_dq.py)).
 The following code brings up a help screen
 
 ```
@@ -46,9 +46,15 @@ python run_osm_dq.py -i <INIFILE> -c <CHECK> -d <DEST_PATH> -p <PREFIX>
 The ini file contains all settings needed to perform the quality checks. For the different quality checks, different
 ini files may be required. The typical sections found are:
 
-```[input_data]```: here the user can insert the osm file that needs be checked (osm_file),
-the extent (xmin, xmax, ymin, ymax) of the target area, the layer index (int) that should be used (layer_index) and the
-layer type that we'd be looking at (layer_type).
+```[input_data]```: here the user can insert the osm file that needs be checked (osm_file), an OpenDataKit (ODK)
+xml-formatted configuration file (see [examples](https://opendatakit.org/help/form-design/examples/))
+the extent (```xmin, xmax, ymin, ymax```) of the target area, the layer index (```int```) that should be used (layer_index) and the
+layer type that we'd be looking at (layer_type). The ODK file can be used to ingest a followed data model. This saves
+you a lot of duplication of configuration of the data model within your ini file, and ensures that the QA procedures
+follow exactly the data model that was also used during collection of the data with OpenDataKit. As ODK forms allow for
+a conditional data model, also conditional checks will be performed. For instance if shape of a drain is circular, then
+also check if a diameter is present. But if the shape is rectangular, then you don't need a radius, instead you need a
+width and depth.
 
 ```[bounds]```: if provided, it defines a filter for polygons, that define user-specified geographical regions for which the
 check should be performed. A layer_index should be selected (when the file contains multiple layers). Care should be
@@ -59,8 +65,9 @@ In the examples, we use the key "name" and as value a list of neighbourhood name
 ```[filter]```: here it is defined which key/value pairs should be considered to filter out data that should be checked for
 quality. The user provides one key (in field key) and a comma-separated list of values (in field value).
 
-```[key_types]```: this section provides a set of keys for which the filtered elements should be checked for, along with the
-expected data type for this key. The entries are typically as follows:
+```[key_types]```: if you use an ODK configuration file, then you don't need to consider this section at all, just leave
+it out! If not, then this section provides a set of keys for which the filtered elements should be checked for, along
+with the expected data type for this key. The entries are typically as follows:
 
 ```
 key1 = datatype1
@@ -71,6 +78,13 @@ etc...
 
 where ```key1```, ```key2``` should be replaced by the actual name of the tag, and ```datatype1``` and ```datatype2```
 should be replaced by the type of data, which can be ```str```, ```int``` or ```float```.
+
+```[key_add]```: in case a file may contain features with more properties than included in the mandated data model, you
+can add an arbitrary number of properties here, along with their data type, very much in the same way as in the entry 
+```[key_types]```. These properties will not be checked for consistency, but will simply be added to the output file.
+This is convenient in case that you wish the output file (including its data quality assurance flags) to be used for 
+further analysis or uptake in e.g. OpenStreetMap.  
+
 
 ```[key_ranges]```: the range of values for each key that is allowed. For floats this should be a comma-separated
 list of 2 values (minimum and maximum) while for integers and strings, this can be a comma-separated list of any number
@@ -104,8 +118,9 @@ provided with ```-p```. The choices for data quality assurance checks are:
 Checks the completeness of the data_model for given filtered features. Features are selected geographically,
 using a user-specified set of polygons (geographically), as well as tag-specific, using a user-specified tag filter.
 For instance, in our examples, we use the section ```[bounds]``` to provide a set of geographical areas on which to perform
-the check, and we use the [filter] section to filter out features using tags. The check then uses the ```[key_types]``` and
-```[key_values]``` to understand the data model and to check if the filtered features follow the data model.
+the check, and we use the [filter] section to filter out features using tags. The check then uses either the data model
+located within the supplied ODK file, or the ```[key_types]``` and ```[key_values]``` sections to understand the data 
+model and to check if the filtered features follow the data model.
 
 ### Connectivity (connectivity)
 Checks topological connectivity of a line network with respect to a (set of) user-selected end segments representing.

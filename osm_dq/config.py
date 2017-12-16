@@ -102,9 +102,9 @@ def add_ini(options, logger=logging):
     config = ConfigObj(options.inifile)
     # read settings
     options.osm_fn = configget(config, 'input_data', 'osm_file', None)
-    options.odk_fn = configget(config, 'input_data', 'odk_config_file', None)
     if options.osm_fn is None:
         raise ValueError('OSM file name not found in ini file, check [input_data] -> osm_file')
+    options.odk_fn = configget(config, 'input_data', 'odk_config_file', None)
     options.layer_index = configget(config, 'input_data', 'layer_index', 1, 'int')
     options.layer_type = configget(config, 'input_data', 'layer_type', 'LineString', 'str')
     options.xmin = configget(config, 'input_data', 'xmin', None, 'float')
@@ -135,11 +135,11 @@ def add_ini(options, logger=logging):
         options.key_ranges = {}
         if options.odk_fn is None:
             # read the config of the data model from the .ini file
-            options.key_types = {}
-            options.json_types = {}
-            for key in config['key_types']:
-                options.key_types[key] = eval(configget(config, 'key_types', key, '', 'str'))
-                options.json_types[key] = configget(config, 'key_types', key, '', 'str')
+            options.key_types = options_add_types(config, 'key_types')
+            options.json_types = options_add_types(config, 'key_types', evaluate=False)
+            # for key in config['key_types']:
+            #     options.key_types[key] = eval(configget(config, 'key_types', key, '', 'str'))
+            #     options.json_types[key] = configget(config, 'key_types', key, '', 'str')
             # now parse the allowed values, check if these need to be converted to a certain data type
             options.conditions = {}  # TODO: also allow for conditionals in .ini file configuration
         else:
@@ -152,6 +152,13 @@ def add_ini(options, logger=logging):
                                                                      )
             options.conditions = io.get_conditions(data_model,
                                                    max_str=options.tag_length)
+
+        # add_props contains additional tags (with data types) that are simply copied, but not part of data model
+        try:
+            options.add_props = options_add_types(config, 'key_add', evaluate=False)
+        except:
+            options.add_props = {}
+
         for key in config['key_ranges']:
             # check datatype
             if key in options.key_types:
@@ -234,3 +241,20 @@ def options_add_filter(config, section):
     if 'layer_index' in config[section]:
         filter['layer_index'] = configget(config, 'bounds', 'layer_index', None, 'int')
     return filter
+
+def options_add_types(config, section, evaluate=True):
+    """
+    Make a dictionary of keys, with their associated datatype. If you set "evaluate" on False, the type will be
+    parsed as a string, otherwise it will be evaluated and returned as a datatype (e.g., int, str, float)
+    :param config: configuration object (read with configobj from ini file)
+    :param section: name of section to parse
+    :param evaluate (default=True): evaluate type yes or no (default is yes)
+    :return: dictionary with keys and associated datatypes
+    """
+    types = {}
+    for key in config[section]:
+        if evaluate:
+            types[key] = eval(configget(config, section, key, '', 'str'))
+        else:
+            types[key] = configget(config, section, key, '', 'str')
+    return types

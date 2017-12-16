@@ -12,7 +12,7 @@ import filter
 
 
 def check_data_model(feats, check_keys={}, check_ranges={}, check_conditions=[], schema=None,
-                     keep_original=False, flag_suffix='_flag', global_props={}, logger=logging):
+                     keep_original=False, flag_suffix='_flag', global_props={}, add_props={}, logger=logging):
     """
     checks all features in list "feats" for compliancy with a data model
 
@@ -106,7 +106,6 @@ def check_data_model(feats, check_keys={}, check_ranges={}, check_conditions=[],
             if v_checked is None:  # v should be checked, but is None, and
                 flag = 3
         return v_checked, flag
-
     feats_checked = []
     for n, feat in enumerate(feats):
         if schema is not None:
@@ -121,6 +120,12 @@ def check_data_model(feats, check_keys={}, check_ranges={}, check_conditions=[],
         # add any properties in global_props (usually the name of bounding box area
         for key in global_props:
             props[key] = global_props[key]
+        # add any additional properties that you want to see copied to the feature without any check
+        for key in add_props:
+            try:
+                props[key] = feat['properties'][key]
+            except:
+                props[key] = None
 
         for key in props_schema:
             # name of the flag tag
