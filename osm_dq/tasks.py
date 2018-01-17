@@ -155,30 +155,35 @@ def run_data_model_check(options, bbox, logger=logging):
         prop_with_flags[bound_filter_key] = 'str'
 
     if 'connectivity' in dir(options):
-        logger.info('Filtering connect features from {:s}'.format(options.connectivity['fn']))
-        logger.info('Using key: {:s} and value: {:s}'.format(options.connectivity['key'], str(options.connectivity['value'])))
-        feats_end_point = filter.filter_features(options.connectivity['fn'],
-                                               osm_config=options.osm_fn,
-                                               key=options.connectivity['key'],
-                                               value=options.connectivity['value'],
-                                               layer_index=options.layer_index,
-                                               wgs2utm=False,
-                                               logger=logger,
-                                               bbox=None,
-                                               )
-        if len(feats_end_point) == 0:
-            logger.warning('No connect features are found in {:s}. Slipping connectivity check'.format(options.connectivity['fn'])
-                         )
-        else:
-            prop_with_flags['connected'] = 'int'
-            prop_with_flags['endpoints'] = 'int'
-            # perform connectivity check
-            feats_checked = check.check_connectivity(feats_checked,
-                                                       feats_end_point,
-                                                       options.connectivity['uniqueid'],
-                                                       tolerance=float(options.connectivity['tolerance']),
-                                                       logger=logger
-                                                       )
+        for c_k in options.connectivity:
+            logger.info('Filtering connect features from {:s}'.format(options.connectivity[c_k]['fn']))
+            logger.info('Using key: {:s} and value: {:s}'.format(options.connectivity[c_k]['key'],
+                                                                 str(options.connectivity[c_k]['value'])
+                                                                 )
+                        )
+            feats_end_point = filter.filter_features(options.connectivity[c_k]['fn'],
+                                                   osm_config=options.osm_fn,
+                                                   key=options.connectivity[c_k]['key'],
+                                                   value=options.connectivity[c_k]['value'],
+                                                   layer_index=options.layer_index,
+                                                   wgs2utm=False,
+                                                   logger=logger,
+                                                   bbox=None,
+                                                   )
+            if len(feats_end_point) == 0:
+                logger.warning('No connect features are found in {:s}. Skipping connectivity check'.format(options.connectivity[c_k]['fn'])
+                             )
+            else:
+                prop_with_flags[c_k] = 'int'
+                prop_with_flags[c_k + '_points'] = 'int'
+                # perform connectivity check
+                feats_checked = check.check_connectivity(feats_checked,
+                                                         feats_end_point,
+                                                         c_k,
+                                                         options.connectivity[c_k]['uniqueid'],
+                                                         tolerance=float(options.connectivity[c_k]['tolerance']),
+                                                         logger=logger,
+                                                         )
 
 
 

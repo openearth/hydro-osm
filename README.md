@@ -123,12 +123,23 @@ located within the supplied ODK file, or the ```[key_types]``` and ```[key_value
 model and to check if the filtered features follow the data model.
 
 ### Connectivity (connectivity)
-Checks topological connectivity of a line network with respect to a (set of) user-selected end segments representing.
-stream network outlets. The end segments are filtered by the user in the section ```[connectivity]``` by using a key and
-value set. key represents the property name and value a comma separated list of values to identify unique features
-that represent outlets. The check filters out line elements that should belong to a network, and checks to which end
-segment the line is connected.
+Checks topological connectivity of a line network with respect to a (set of) user-selected end segments or points representing
+for instance stream beginnings or outlets. The end segments are filtered by the user in sections named
+```[connectivity_XXXX]``` where ```XXXX``` can be filled in by the user. ```XXXX``` can for instance be ```begin```
+or ```outlet```. In each connectivity section, a user defines the following:
 
+| Key           | Value         | 
+| ------------- |:-------------:| 
+| ```file```    | the vector file that should be used to filter out point or segments that represent connectivity check points. If this is not provided, this may be left open | 
+| ```key```     | The tag that identifies the type of drainage connection features (e.g. ```feature_type```) | 
+| ```value```   | The (comma-separated value(s) of the tag, that identify the drainage connection features that you would like to check connectivity against (e.g. ```outflow, no_exit, other```)| 
+| ```uniqueid```| A tag that usually is unique per connection feature| 
+
+For each connectivity section, the connectivity check is performed separately. In this way you can check in one go for 
+connectivity of outlets, as well as begin points, as well as potentially other points you expect connectivity against. You
+may for instance also add a check for connectivity to silt traps if you wish to understand which parts of drainage 
+network have a connection to siltation facilities. This section you could call ```[connectivity_silt]``` for instance.
+ 
 ### Crossings (crossings)
 Three additional tag filters need to be provided for this, ```[filter_highway]```, ```[filter_bridge]``` and ```[filter_tunnel]```.
 The check will use the filter ```[filter]``` to filter out water ways, ```[filter_highway]``` to filter out roads, ```[filter_bridge]```
@@ -156,9 +167,12 @@ One unique additional key is added called ```geom_check```. This field is 0 when
 geometry and 1 when the geometry is in any way invalid.
 
 ### Connectivity
-This check only provides one output. A GeoJSON file with the filtered line elements. A tag 'connected' is added. This
-tag gives the osm_id to which the line elements is topologically connected, or a zero when there is no connection to
-any selected end segment.
+This check is performed either separately or combined with the data model check. It is automatically executed after
+the data model quality check, if any ```[connectivity_XXXX]``` section is provided in the .ini file (where you can select
+your own naming for the part ```XXX```). For each ```[connectivity_XXXX]``` section in the .ini file, a tag is added to 
+the output GeoJSON, called ```connectivity_XXXX``` with values being zero if the feature is not connected to any points 
+filtered out with the settings under the respective filter, or the value of the ```uniqueid``` of the connection 
+feature it is connected to.
 
 ### Crossings
 The check gives two outputs:

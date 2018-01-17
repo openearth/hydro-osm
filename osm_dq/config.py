@@ -122,16 +122,32 @@ def add_ini(options, logger=logging):
         options.filter_highway = options_add_filter(config, 'filter_highway')
         options.filter_bridge = options_add_filter(config, 'filter_bridge')
         options.filter_tunnel = options_add_filter(config, 'filter_tunnel')
-    if 'connectivity' in config.keys():
-        options.connectivity = options_add_filter(config, 'connectivity')
-        # options.connectivity = {}
-        # options.connectivity['idx'] = configget(config, 'connectivity', 'selected_id', 'list')
-        options.connectivity['fn'] = configget(config, 'connectivity', 'file', options.osm_fn)  # if not provided, assumes the osm_fn is to be used
-        options.connectivity['tolerance'] = configget(config, 'connectivity', 'tolerance', 0.0000001, 'float')
-        # make sure the tolerance is positive and not nill
-        options.connectivity['tolerance'] = max(0.0000001, options.connectivity['tolerance'])
+    connectivity_keys = [s for s in config.keys() if 'connectivity' in s]
+    if any(connectivity_keys):
+        options.connectivity = {}
+        for c_k in connectivity_keys:
+            options.connectivity[c_k] = options_add_filter(config, c_k)
+            options.connectivity[c_k]['fn'] = configget(config,
+                                                        c_k,
+                                                        'file',
+                                                        options.osm_fn
+                                                        )  # if not provided, assumes the osm_fn is to be used
+            options.connectivity[c_k]['tolerance'] = configget(config,
+                                                               c_k,
+                                                               'tolerance',
+                                                               0.0000001,
+                                                               'float'
+                                                               )
+            # make sure the tolerance is positive and not nill
+            options.connectivity[c_k]['tolerance'] = max(0.0000001,
+                                                         options.connectivity[c_k]['tolerance']
+                                                                      )
 
-        options.connectivity['uniqueid'] = configget(config, 'connectivity', 'uniqueid', '_id')
+            options.connectivity[c_k]['uniqueid'] = configget(config,
+                                                              'connectivity',
+                                                              'uniqueid',
+                                                              '_id'
+                                                              )
 
     if (options.check == 'data_model' or options.check == 'connectivity'):
         options.filter = options_add_filter(config, 'filter')
