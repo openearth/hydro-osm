@@ -149,7 +149,11 @@ contains the tags that were relevant in the selected data model, as well as new 
 suffix '_flag' that show the result of the check on that feature and tag. For instance if a check is performed on the
 tag 'width', the check will return the original value of the tag 'width' for each feature, but also a tag 'width_flag'.
 This tag can have the value 0 (valid value), 1 (invalid value), 2 (incorrect data type) or 3 (no value). It is then
-straightforward to use these flag values to color code the GIS layout.
+straightforward to use these flag values to color code the GIS layout. Any additional tags, defined in the section
+```[key_add]``` are simply copied to the GeoJSON without any checks. ```[key_add]``` can help you to provide
+ a complete file, ready for upload to OpenStreetMap.
+One unique additional key is added called ```geom_check```. This field is 0 when the feature contains a valid
+geometry and 1 when the geometry is in any way invalid.
 
 ### Connectivity
 This check only provides one output. A GeoJSON file with the filtered line elements. A tag 'connected' is added. This
