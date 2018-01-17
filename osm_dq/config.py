@@ -28,7 +28,7 @@ def create_options():
     (options, args) = parser.parse_args()
     if len(args) != 0:
         print('Incorrect number of arguments given. Please run with option "-h" for help')
-        sys.exit(0)
+        sys.exit(1)
 
     if not os.path.exists(options.inifile):
         print('path to ini file {:s} cannot be found'.format(os.path.abspath(options.inifile)))
@@ -122,12 +122,16 @@ def add_ini(options, logger=logging):
         options.filter_highway = options_add_filter(config, 'filter_highway')
         options.filter_bridge = options_add_filter(config, 'filter_bridge')
         options.filter_tunnel = options_add_filter(config, 'filter_tunnel')
-
-    if options.check == 'connectivity':
+    if 'connectivity' in config.keys():
         options.connectivity = options_add_filter(config, 'connectivity')
         # options.connectivity = {}
         # options.connectivity['idx'] = configget(config, 'connectivity', 'selected_id', 'list')
-        options.connectivity['tolerance'] = configget(config, 'connectivity', 'tolerance', '', 'float')
+        options.connectivity['fn'] = configget(config, 'connectivity', 'file', options.osm_fn)  # if not provided, assumes the osm_fn is to be used
+        options.connectivity['tolerance'] = configget(config, 'connectivity', 'tolerance', 0.0000001, 'float')
+        # make sure the tolerance is positive and not nill
+        options.connectivity['tolerance'] = max(0.0000001, options.connectivity['tolerance'])
+
+        options.connectivity['uniqueid'] = configget(config, 'connectivity', 'uniqueid', '_id')
 
     if (options.check == 'data_model' or options.check == 'connectivity'):
         options.filter = options_add_filter(config, 'filter')

@@ -9,7 +9,7 @@ import numpy as np
 
 # package components
 import filter
-
+from shapely.geometry import GeometryCollection
 
 def check_data_model(feats, check_keys={}, check_ranges={}, check_conditions=[], schema=None,
                      keep_original=False, flag_suffix='_flag', global_props={}, add_props={}, logger=logging):
@@ -168,23 +168,24 @@ def check_data_model(feats, check_keys={}, check_ranges={}, check_conditions=[],
     return feats_checked
 
 
-def check_connectivity(feats, key, values=[], tolerance=0.0001, check_keys={}, check_ranges={}, logger=logging,schema=None):
+def check_connectivity(feats, feats_end_point, uniqueid, tolerance=0.0001, logger=logging):
     """
-    checks the connectivity of all features in list "feats". Connected features are given the same connected_id, based on the
+    checks the connectivity of all features in list "feats" to features in list feats_end_points.
+    Connected features are given the same connected_id, based on the
     initialy selected feature.
 
     Args:
         feats: list of JSON-type features (with 'geometry' and 'properties')
-        select_id={}: id of the selected elemenet for which the connected network will be checked. Is set in ini-file
-        tolerance=: tolerance where within elements are assumend to be connected. Is set in ini-file
-        check_keys={}: dictionary of keys with datatypes
+        feats_end_points: features, to which other features should be connected to
+        uniqueid: key name of identifier for features that all features should be connected to
+        tolerance=: tolerance where within elements are assumed to be connected. Is set in ini-file
         logger=logging: reference to logger object for messaging
 
     Returns:
         feats: list of JSON-type features with 'properties' containing the connected flag (id)
     """
     feats_ = copy.copy(feats)
-
+    logger.info('Checking the connectivity...')
     # Build a spatial index to make all faster
     tree_idx = rtree.index.Index()
     lines_bbox = [l['geometry'].buffer(tolerance).bounds for l in feats_]
@@ -196,13 +197,18 @@ def check_connectivity(feats, key, values=[], tolerance=0.0001, check_keys={}, c
     for i, feat in enumerate(feats_):
         feat['properties']['connected'] = 0
         feat['properties']['endpoints'] = 0
-
+    # make a geometry collection from all end points
+    end_geoms = GeometryCollection([f['geometry'] for f in feats_end_point])
     # Make a list of the selected elements, for which we need to check the connectivity
-    select_ids = [idx for idx in np.arange(0, len(feats_)) if str(feats_[idx]['properties'][key]) in values]
+
+    select_ids = [idx for idx in np.arange(0, len(feats_)) if
+                  end_geoms.intersects(feats_[idx]['geometry'])]
+
+    # select_ids = [idx for idx in np.arange(0, len(feats_)) if str(feats_[idx]['properties'][key]) in values]
     # Now start the actual check, looping over the selected elements
     for select_id in select_ids:
         # First set the properties of the selected elements
-        feats_[int(select_id)]['properties']['connected'] = feats_[select_id]['properties'][key]
+        feats_[int(select_id)]['properties']['connected'] = feats_[select_id]['properties'][uniqueid]
         feats_[int(select_id)]['properties']['endpoints'] = 2
         to_check = 1
         endpoints_list = [select_id]
@@ -216,15 +222,16 @@ def check_connectivity(feats, key, values=[], tolerance=0.0001, check_keys={}, c
                     if feats_[i]['properties']['endpoints'] > 0:
                         feats_[i]['properties']['endpoints'] = feats_[i]['properties']['endpoints'] - 1
 
-                    # Check if element is not itself, to overcome the issue of endless loop.
-                    if feats_[i]['properties']['connected'] != feats_[select_id]['properties'][key]:
-                        ## Now check is elements are disjoint. If disjoint, continue to the next step.
+                    # Check if element is not itself, to overcome the issue of endless loop
+                    if feats_[i]['properties']['connected'] != feats_[select_id]['properties'][uniqueid]:
+                    # if feats_[i]['geometry'] != feats_[select_id]['geometry']:  # check if this can be done with i != select_id
+                        # Check if elements are disjoint. If disjoint, continue to the next step.
                         if feats_[i]['geometry'].disjoint(feats_[int(endpoint_id)]['geometry'].buffer(tolerance)):
                             continue
                         else:
                             # If elements are not disjoint, change the properties and add element to the "connected" list.
                             feats_[i]['properties']['endpoints'] = 15
-                            feats_[i]['properties']['connected'] = feats_[select_id]['properties'][key]
+                            feats_[i]['properties']['connected'] = feats_[select_id]['properties'][uniqueid]
 
             endpoints_list = [j for j, feat in enumerate(feats_) if feat['properties']['endpoints'] > 0]
             to_check = len(endpoints_list)
