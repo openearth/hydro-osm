@@ -170,37 +170,46 @@ def filter_features(fn, layer_index=1, osm_config=None, bbox=None, key='waterway
     all_features = [[]]*len(bbox)
     # features = []  # output is list of features
     for n, feat in enumerate(src_lyr):
+        geom_validity = 0
         if feat.GetGeometryRef() is None:
             logger.warning('Feature {:d} contains NULL geometry, please check this in input file'.format(n + 1))
-            continue
+            geom_validity = 1
+            # continue
         feat_geom = feat.GetGeometryRef()
         # print feat_geom.GetPointCount()
-        if feat_geom.GetPointCount() == 0:
-            logger.warning('Feature {:d} contains geometry of zero points, please check this in input file'.format(n + 1))
-            continue
-        try:
-            geom = shapely.wkt.loads(feat_geom.ExportToWkt())
-        except:
-            logger.warning('Feature {:d}: cannot make geometry from {:d} vertices. Please check this in input file'. format(n + 1, feat_geom.GetPointCount()))
-            continue
-        if wgs2utm:
-            geom = toUTM(geom)
-        # check if feature is completely outside domain (if so, discard)
-        if bbox[0] is not None:
+        if geom_validity == 0:
+            if feat_geom.GetPointCount() == 0:
+                logger.warning('Feature {:d} contains geometry of zero points, please check this in input file'.format(n + 1))
+                geom_validity = 1
+                # continue
+        if geom_validity == 0:
             try:
-                geom_disjoint = [bb.buffer(0).disjoint(geom) for bb in bbox if bb is not None]
-                if all(geom_disjoint):
-                    continue
+                geom = shapely.wkt.loads(feat_geom.ExportToWkt())
             except:
-                logging('Could not perform disjoint operation on geometry, skipping...')
-                continue
-        else:
-            geom_disjoint = [False]*len(bbox)
-        # check if feature obeys to key/value filter. If not continue to next feature
+                logger.warning('Feature {:d}: cannot make geometry from {:d} vertices. Please check this in input file'. format(n + 1, feat_geom.GetPointCount()))
+                geom = None
+                geom_validity = 1
+                # continue
+        if geom_validity == 0:
+            if wgs2utm:
+                geom = toUTM(geom)
+            # check if feature is completely outside domain (if so, discard)
+            if bbox[0] is not None:
+                try:
+                    geom_disjoint = [bb.buffer(0).disjoint(geom) for bb in bbox if bb is not None]
+                    if all(geom_disjoint):
+                        continue
+                except:
+                    logging('Could not perform disjoint operation on geometry, skipping...')
+                    continue
+            else:
+                geom_disjoint = [False]*len(bbox)
+            # check if feature obeys to key/value filter. If not continue to next feature
         if not(_check_filter(feat, key, value)):
             continue
         # copy properties to JSON dictionary structure
         properties = _props2dict(feat)
+        properties['geom_check'] = int(geom_validity)
         # read geometry
         try:
             ft = create_feature(geom, missing_value=None, **properties)

@@ -158,6 +158,8 @@ def add_ini(options, logger=logging):
             options.add_props = options_add_types(config, 'key_add', evaluate=False)
         except:
             options.add_props = {}
+        # add check of geometry validity
+        options.add_props['geom_check'] = 'int'
 
         for key in config['key_ranges']:
             # check datatype
