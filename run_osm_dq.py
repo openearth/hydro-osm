@@ -50,9 +50,9 @@ def main():
     if options.check == 'data_model':
         tasks.run_data_model_check(options, bbox, logger)
 
-    # check connectivity
-    if options.check == 'connectivity':
-        tasks.run_connectivity_check(options, bbox, logger)
+    # # check connectivity
+    # if options.check == 'connectivity':
+    #     tasks.run_connectivity_check(options, bbox, logger)
 
     # check crossings of waterways and roads
     if options.check == 'crossings':
