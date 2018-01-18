@@ -1,0 +1,342 @@
+<?xml version="1.0"?>
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa" xmlns:orx="http://openrosa.org/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <h:head>
+    <h:title>RH_drain_segment_V_1-1-5</h:title>
+    <model>
+      <instance>
+        <RH_drain_segment_V1-1-5 id="RH_drain_segment_V_1-1-5" version="RH_drain_segment_V_1-1-5">
+          <start/>
+          <end/>
+          <today/>
+          <deviceid/>
+          <subscriberid/>
+          <simserial/>
+          <phonenumber/>
+          <drain_line/>
+          <reference_road_present/>
+          <elevation_from_road/>
+          <drain_type/>
+          <problem_decomissioned_drain/>
+          <distance_from_road/>
+          <profile_open/>
+          <profile_closed/>
+          <names>
+            <description/>
+            <picture/>
+          </names>
+          <multiple_channels/>
+          <number_channels/>
+          <covered/>
+          <cover_type/>
+          <depth/>
+          <width/>
+          <diameter/>
+          <bottom_width/>
+          <top_width/>
+          <elliptical_portion_depth/>
+          <tabulated_section jr:template="">
+            <tabulated_section_dimensions>
+              <tab_section_width/>
+              <tab_section_height/>
+            </tabulated_section_dimensions>
+          </tabulated_section>
+          <material/>
+          <other_material/>
+          <smoothness/>
+          <steel_type/>
+          <picture_001/>
+          <comment/>
+          <meta>
+            <instanceID/>
+          </meta>
+        </RH_drain_segment_V1-1-5>
+      </instance>
+      <bind jr:preload="timestamp" jr:preloadParams="start" nodeset="/RH_drain_segment_V1-1-5/start" type="dateTime"/>
+      <bind jr:preload="timestamp" jr:preloadParams="end" nodeset="/RH_drain_segment_V1-1-5/end" type="dateTime"/>
+      <bind jr:preload="date" jr:preloadParams="today" nodeset="/RH_drain_segment_V1-1-5/today" type="date"/>
+      <bind jr:preload="property" jr:preloadParams="deviceid" nodeset="/RH_drain_segment_V1-1-5/deviceid" type="string"/>
+      <bind jr:preload="property" jr:preloadParams="subscriberid" nodeset="/RH_drain_segment_V1-1-5/subscriberid" type="string"/>
+      <bind jr:preload="property" jr:preloadParams="simserial" nodeset="/RH_drain_segment_V1-1-5/simserial" type="string"/>
+      <bind jr:preload="property" jr:preloadParams="phonenumber" nodeset="/RH_drain_segment_V1-1-5/phonenumber" type="string"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/drain_line" type="geotrace"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/reference_road_present" type="select1"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/elevation_from_road" relevant=" /RH_drain_segment_V1-1-5/reference_road_present  = 'yes'" type="int"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/drain_type" type="select1"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/problem_decomissioned_drain" relevant=" /RH_drain_segment_V1-1-5/drain_type  = 'decomissioned'" type="string"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/distance_from_road" relevant=" /RH_drain_segment_V1-1-5/reference_road_present  = 'yes'" type="int"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/profile_open" relevant=" /RH_drain_segment_V1-1-5/drain_type  = 'drain'" type="select1"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/profile_closed" relevant=" /RH_drain_segment_V1-1-5/drain_type  = 'culvert'" type="select1"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/names" relevant=" /RH_drain_segment_V1-1-5/profile_closed  = 'other'"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/names/description" type="string"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/names/picture" type="binary"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/multiple_channels" relevant=" /RH_drain_segment_V1-1-5/drain_type  = 'culvert'" type="select1"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/number_channels" relevant=" /RH_drain_segment_V1-1-5/multiple_channels  = 'yes'" type="int"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/covered" relevant=" /RH_drain_segment_V1-1-5/drain_type  = 'drain' or  /RH_drain_segment_V1-1-5/drain_type  = 'ditch'" type="select1"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/cover_type" relevant=" /RH_drain_segment_V1-1-5/covered  = 'yes'" type="select1"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/depth" type="int"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/width" relevant=" /RH_drain_segment_V1-1-5/profile_open  = 'open_rectangular' or  /RH_drain_segment_V1-1-5/profile_closed  = 'boxed_rectangular' or  /RH_drain_segment_V1-1-5/drain_type  = 'ditch'" type="int"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/diameter" relevant=" /RH_drain_segment_V1-1-5/profile_closed  = 'round'" type="int"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/bottom_width" relevant=" /RH_drain_segment_V1-1-5/profile_open  = 'trapezoid' or  /RH_drain_segment_V1-1-5/profile_open  = 'tabulated' or  /RH_drain_segment_V1-1-5/profile_open  = 'elliptical_trapezoid'" type="int"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/top_width" relevant=" /RH_drain_segment_V1-1-5/profile_open  = 'trapezoid' or  /RH_drain_segment_V1-1-5/profile_open  = 'tabulated' or  /RH_drain_segment_V1-1-5/profile_open  = 'elliptical' or  /RH_drain_segment_V1-1-5/profile_open  = 'elliptical_trapezoid'" type="int"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/elliptical_portion_depth" relevant=" /RH_drain_segment_V1-1-5/profile_open  = 'elliptical_trapezoid'" type="int"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/tabulated_section" relevant=" /RH_drain_segment_V1-1-5/profile_open  = 'elliptical_trapezoid'"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/tabulated_section/tabulated_section_dimensions/tab_section_width" type="int"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/tabulated_section/tabulated_section_dimensions/tab_section_height" type="int"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/material" relevant=" /RH_drain_segment_V1-1-5/drain_type  = 'drain' or  /RH_drain_segment_V1-1-5/drain_type  = 'culvert'" type="select1"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/other_material" relevant=" /RH_drain_segment_V1-1-5/material  = 'other'" type="string"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/smoothness" relevant=" /RH_drain_segment_V1-1-5/material  = 'concrete'" type="select1"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/steel_type" relevant=" /RH_drain_segment_V1-1-5/material  = 'steel'" type="select1"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/picture_001" type="binary"/>
+      <bind nodeset="/RH_drain_segment_V1-1-5/comment" type="string"/>
+      <bind calculate="concat('uuid:', uuid())" nodeset="/RH_drain_segment_V1-1-5/meta/instanceID" readonly="true()" type="string"/>
+    </model>
+  </h:head>
+  <h:body>
+    <input ref="/RH_drain_segment_V1-1-5/drain_line">
+      <label>Please take a GeoTrace line along the length of the drain.</label>
+      <hint>Please do not save until your GeoTrace follows the drain properly, especially at the endpoints!</hint>
+    </input>
+    <select1 ref="/RH_drain_segment_V1-1-5/reference_road_present">
+      <label>Does this drain follow a road that can be used as a reference for its position or relative elevation?</label>
+      <hint>If the drain is alongside a road, or is very close to a road that is mapped in OSM, select Yes.</hint>
+      <item>
+        <label>Yes</label>
+        <value>yes</value>
+      </item>
+      <item>
+        <label>No</label>
+        <value>no</value>
+      </item>
+    </select1>
+    <input ref="/RH_drain_segment_V1-1-5/elevation_from_road">
+      <label>How far down (elevation) is the bottom of the drain from the surface of the reference road?</label>
+      <hint>in cm. Make sure you are measuring from the road surface to the bottom of the drain!</hint>
+    </input>
+    <select1 ref="/RH_drain_segment_V1-1-5/drain_type">
+      <label>What type of drain is this?</label>
+      <item>
+        <label>Drain</label>
+        <value>drain</value>
+      </item>
+      <item>
+        <label>Ditch</label>
+        <value>ditch</value>
+      </item>
+      <item>
+        <label>Culvert</label>
+        <value>culvert</value>
+      </item>
+      <item>
+        <label>Decomissioned (buried or destroyed) drain</label>
+        <value>decomissioned</value>
+      </item>
+      <item>
+        <label>Road with no drain</label>
+        <value>road_no_drain</value>
+      </item>
+    </select1>
+    <input ref="/RH_drain_segment_V1-1-5/problem_decomissioned_drain">
+      <label>What is the problem with this drain?</label>
+      <hint>How has it become decomissioned?</hint>
+    </input>
+    <input ref="/RH_drain_segment_V1-1-5/distance_from_road">
+      <label>How far is the drain from the edge of the road (if paved, from the edge of the paved surface) in cm?</label>
+      <hint>Only fill this in if the drain is basically parallel to the road at a constant distance.</hint>
+    </input>
+    <select1 ref="/RH_drain_segment_V1-1-5/profile_open">
+      <label>What is the profile of the drain?</label>
+      <item>
+        <label>Open rectangular</label>
+        <value>open_rectangular</value>
+      </item>
+      <item>
+        <label>Trapezoid</label>
+        <value>trapezoid</value>
+      </item>
+      <item>
+        <label>Elliptical (part of a circle)</label>
+        <value>elliptical</value>
+      </item>
+      <item>
+        <label>Trapezoid with elliptical base</label>
+        <value>elliptical_trapezoid</value>
+      </item>
+      <item>
+        <label>Tabulated</label>
+        <value>tabulated</value>
+      </item>
+    </select1>
+    <select1 ref="/RH_drain_segment_V1-1-5/profile_closed">
+      <label>What is the profile of the culvert?</label>
+      <item>
+        <label>Round</label>
+        <value>round</value>
+      </item>
+      <item>
+        <label>Boxed rectangular</label>
+        <value>boxed_rectangular</value>
+      </item>
+      <item>
+        <label>Other</label>
+        <value>other</value>
+      </item>
+    </select1>
+    <group appearance="field-list" ref="/RH_drain_segment_V1-1-5/names">
+      <label>Names</label>
+      <input ref="/RH_drain_segment_V1-1-5/names/description">
+        <label>Describe the profile of the culvert</label>
+      </input>
+      <upload mediatype="image/*" ref="/RH_drain_segment_V1-1-5/names/picture">
+        <label>Please take a picture of the feature you just described</label>
+        <hint>Please take a new picture, do not select "Choose Image"</hint>
+      </upload>
+    </group>
+    <select1 ref="/RH_drain_segment_V1-1-5/multiple_channels">
+      <label>Does this culvert have multiple channels?</label>
+      <hint>Only select Yes if the channels are all identical in size and profile, and are parallel to one another.</hint>
+      <item>
+        <label>Yes</label>
+        <value>yes</value>
+      </item>
+      <item>
+        <label>No</label>
+        <value>no</value>
+      </item>
+    </select1>
+    <input ref="/RH_drain_segment_V1-1-5/number_channels">
+      <label>How many channels does this culvert have?</label>
+    </input>
+    <select1 ref="/RH_drain_segment_V1-1-5/covered">
+      <label>Is the drain covered along this entire segment?</label>
+      <hint>Only select covered if most of the drain is covered (except a few broken covers). Bridges do not count as covered, take them as point features.</hint>
+      <item>
+        <label>Yes</label>
+        <value>yes</value>
+      </item>
+      <item>
+        <label>No</label>
+        <value>no</value>
+      </item>
+    </select1>
+    <select1 ref="/RH_drain_segment_V1-1-5/cover_type">
+      <label>What is the drain covered with?</label>
+      <item>
+        <label>Concrete</label>
+        <value>concrete</value>
+      </item>
+      <item>
+        <label>Grating</label>
+        <value>grating</value>
+      </item>
+      <item>
+        <label>Wood</label>
+        <value>wood</value>
+      </item>
+      <item>
+        <label>OTHER</label>
+        <value>other</value>
+      </item>
+    </select1>
+    <input ref="/RH_drain_segment_V1-1-5/depth">
+      <label>How deep is it?</label>
+      <hint>in cm, from the lip of the lowest side to the bottom of the drain.</hint>
+    </input>
+    <input ref="/RH_drain_segment_V1-1-5/width">
+      <label>What is the width?</label>
+      <hint>in cm</hint>
+    </input>
+    <input ref="/RH_drain_segment_V1-1-5/diameter">
+      <label>What is the diameter of the drain?</label>
+      <hint>in cm</hint>
+    </input>
+    <input ref="/RH_drain_segment_V1-1-5/bottom_width">
+      <label>How wide is the drain at the bottom?</label>
+      <hint>in cm. Small changes in width, no more than 10 cm, do not require a new segment.</hint>
+    </input>
+    <input ref="/RH_drain_segment_V1-1-5/top_width">
+      <label>How wide is the drain at the top?</label>
+      <hint>in cm, to the the top of the construction (not including surrounding earth)</hint>
+    </input>
+    <input ref="/RH_drain_segment_V1-1-5/elliptical_portion_depth">
+      <label>How deep is the elliptical portion of the drain?</label>
+      <hint>Measure from the bottom of the circular portion to the imaginary line across the top of the circular portion.</hint>
+    </input>
+    <group ref="/RH_drain_segment_V1-1-5/tabulated_section">
+      <label>Tabulated section</label>
+      <repeat nodeset="/RH_drain_segment_V1-1-5/tabulated_section">
+        <group appearance="field-list" ref="/RH_drain_segment_V1-1-5/tabulated_section/tabulated_section_dimensions">
+          <label>Tabulated sections</label>
+          <input ref="/RH_drain_segment_V1-1-5/tabulated_section/tabulated_section_dimensions/tab_section_width">
+            <label>How wide is the bottom of the tabulated section?</label>
+          </input>
+          <input ref="/RH_drain_segment_V1-1-5/tabulated_section/tabulated_section_dimensions/tab_section_height">
+            <label>How far up from the previous section is the bottom of this tabulated section?</label>
+          </input>
+        </group>
+      </repeat>
+    </group>
+    <select1 ref="/RH_drain_segment_V1-1-5/material">
+      <label>What is the drain made from?</label>
+      <item>
+        <label>Concrete</label>
+        <value>concrete</value>
+      </item>
+      <item>
+        <label>Rock and mortar</label>
+        <value>rock</value>
+      </item>
+      <item>
+        <label>Steel</label>
+        <value>steel</value>
+      </item>
+      <item>
+        <label>Plastic</label>
+        <value>plastic</value>
+      </item>
+      <item>
+        <label>Asphalt</label>
+        <value>asphalt</value>
+      </item>
+      <item>
+        <label>Other</label>
+        <value>other</value>
+      </item>
+    </select1>
+    <input ref="/RH_drain_segment_V1-1-5/other_material">
+      <label>You said Other. What is it made from?</label>
+    </input>
+    <select1 ref="/RH_drain_segment_V1-1-5/smoothness">
+      <label>How smooth is the surface of the drain?</label>
+      <item>
+        <label>Normal concrete, in good repair</label>
+        <value>1</value>
+      </item>
+      <item>
+        <label>Rough, with noticeble holes or cracks</label>
+        <value>2</value>
+      </item>
+      <item>
+        <label>Very rough, with loose material, broken areas, and/or large cracks</label>
+        <value>3</value>
+      </item>
+    </select1>
+    <select1 ref="/RH_drain_segment_V1-1-5/steel_type">
+      <label>What kind of steel is the surface of the drain made of?</label>
+      <item>
+        <label>Corrugated steel</label>
+        <value>corrugated</value>
+      </item>
+      <item>
+        <label>Flat (smooth) steel</label>
+        <value>flat</value>
+      </item>
+    </select1>
+    <upload mediatype="image/*" ref="/RH_drain_segment_V1-1-5/picture_001">
+      <label>Please take a picture of the feature you just surveyed.</label>
+      <hint>Please take a new picture, do not select "Choose Image"</hint>
+    </upload>
+    <input ref="/RH_drain_segment_V1-1-5/comment">
+      <label>Please indicate if there is anything special or problematic about this drain.</label>
+    </input>
+  </h:body>
+</h:html>
