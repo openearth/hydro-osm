@@ -190,7 +190,16 @@ def check_connectivity(feats, feats_end_point, connect_name, uniqueid, tolerance
     logger.info('Checking the connectivity...')
     # Build a spatial index to make all faster
     tree_idx = rtree.index.Index()
-    lines_bbox = [l['geometry'].buffer(tolerance).bounds for l in feats_]
+    # lines_bbox = []
+    # for n, l in enumerate(feats_):
+    #     print n
+    #     if n == 308:
+    #         import pdb; pdb.set_trace()
+    #     add = l['geometry'].buffer(tolerance).bounds
+    #     lines_bbox.append(add)
+    #
+    lines_bbox = [l['geometry'].buffer(tolerance).bounds if l['geometry'] is not None else (0., 0., 0., 0.) for l in feats_]  # else None
+    # import pdb; pdb.set_trace()
 
     for i, bbox in enumerate(lines_bbox):
         tree_idx.insert(i, bbox)
@@ -200,10 +209,16 @@ def check_connectivity(feats, feats_end_point, connect_name, uniqueid, tolerance
         feat['properties'][connect_name] = 0
         feat['properties'][end_name] = 0
     # make a geometry collection from all end points
-    end_geoms = GeometryCollection([f['geometry'] for f in feats_end_point])
+    end_geoms = GeometryCollection([f['geometry'] for f in feats_end_point if f['geometry'] is not None])
     # Make a list of the selected elements, for which we need to check the connectivity
-
-    select_ids = [idx for idx in np.arange(0, len(feats_)) if
+    # select_ids = []
+    # for idx in np.arange(0, len(feats_)):
+    #     print idx
+    #     if feats_[idx]['geometry'] is not None:
+    #         # import pdb; pdb.set_trace()
+    #         if end_geoms.intersects(feats_[idx]['geometry']):
+    #             select_ids.append(idx)
+    select_ids = [idx for idx in np.arange(0, len(feats_)) if feats_[idx]['geometry'] is not None if
                   end_geoms.intersects(feats_[idx]['geometry'])]
 
     # select_ids = [idx for idx in np.arange(0, len(feats_)) if str(feats_[idx]['properties'][key]) in values]
@@ -228,13 +243,15 @@ def check_connectivity(feats, feats_end_point, connect_name, uniqueid, tolerance
                     if feats_[i]['properties'][connect_name] != feats_[select_id]['properties'][uniqueid]:
                     # if feats_[i]['geometry'] != feats_[select_id]['geometry']:  # check if this can be done with i != select_id
                         # Check if elements are disjoint. If disjoint, continue to the next step.
-                        if feats_[i]['geometry'].disjoint(feats_[int(endpoint_id)]['geometry'].buffer(tolerance)):
-                            continue
-                        else:
-                            # If elements are not disjoint, change the properties and add element to the "connected" list.
-                            feats_[i]['properties'][end_name] = 15
-                            feats_[i]['properties'][connect_name] = feats_[select_id]['properties'][uniqueid]
-
+                        if feats_[i]['geometry'] is not None:
+                            if feats_[i]['geometry'].disjoint(feats_[int(endpoint_id)]['geometry'].buffer(tolerance)):
+                                continue
+                            else:
+                                # If elements are not disjoint, change the properties and add element to the "connected" list.
+                                feats_[i]['properties'][end_name] = 15
+                                feats_[i]['properties'][connect_name] = feats_[select_id]['properties'][uniqueid]
+                    else:
+                        continue
             endpoints_list = [j for j, feat in enumerate(feats_) if feat['properties'][end_name] > 0]
             to_check = len(endpoints_list)
 

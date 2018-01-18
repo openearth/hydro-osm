@@ -74,9 +74,10 @@ def write_layer(db, layer_name, data, write_mode='w', format='ESRI Shapefile', s
                   }
     # Write a new Shapefile
     with fiona.open(db, write_mode, format, schema, layer=layer_name, crs=crs) as c:
-        for o in data:
+        for n, o in enumerate(data):
             p = o.copy()
-            p['geometry'] = shapely.geometry.mapping(p['geometry'])
+            if p['geometry'] is not None:
+                p['geometry'] = shapely.geometry.mapping(p['geometry'])
             c.write(p)
     logger.info('file successfully written to {}'.format(db))
     return
