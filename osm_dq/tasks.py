@@ -162,7 +162,7 @@ def run_data_model_check(options, bbox, logger=logging):
                                                                  )
                         )
             feats_end_point = filter.filter_features(options.connectivity[c_k]['fn'],
-                                                   osm_config=options.osm_fn,
+                                                   osm_config=options.osm_config,
                                                    key=options.connectivity[c_k]['key'],
                                                    value=options.connectivity[c_k]['value'],
                                                    layer_index=options.layer_index,
@@ -218,87 +218,87 @@ def run_data_model_check(options, bbox, logger=logging):
     writer.save()
 
 
-def run_connectivity_check(options, bbox, logger):
-    logger.info('Filtering features from {:s}'.format(options.osm_fn))
-    logger.info('Using key: {:s} and value: {:s}'.format(options.filter['key'], str(options.filter['value'])))
-    feats = filter.filter_features(options.osm_fn,
-                           osm_config=options.osm_config,
-                           key=options.filter['key'],
-                           value=options.filter['value'],
-                           layer_index=options.layer_index,
-                           wgs2utm=False,
-                           logger=logger,
-                           bbox=None,
-                           )
-    # add connectivity flag to the model
-    schema = {
-              'geometry': options.layer_type,
-              'properties': options.json_types
-    }
-    feats_checked = check.check_data_model(feats,
-                                           check_keys=options.key_types,
-                                           check_ranges=options.key_ranges,
-                                           check_conditions=options.conditions,
-                                           schema=schema,
-                                           keep_original=True,
-                                           add_props=options.add_props,
-                                           logger=logger,
-                                           )
-    logger.info('Filtering connect features from {:s}'.format(options.connectivity['fn']))
-    logger.info('Using key: {:s} and value: {:s}'.format(options.connectivity['key'], str(options.connectivity['value'])))
-    feats_end_point = filter.filter_features(options.connectivity['fn'],
-                                           osm_config=options.osm_fn,
-                                           key=options.connectivity['key'],
-                                           value=options.connectivity['value'],
-                                           layer_index=options.layer_index,
-                                           wgs2utm=False,
-                                           logger=logger,
-                                           bbox=None,
-                                           )
-    if len(feats_end_point) == 0:
-        logger.error('No connect features are found in {:s}. Is your filter correct? {:s}: {:s}'.format(options.connectivity['fn'],
-                                                                                                        options.connectivity['key'],
-                                                                                                        options.connectivity['value']
-                                                                                                        )
-                     )
-        sys.exit(1)
-    prop_with_flags = {}
-    for key in options.json_types:
-        prop_with_flags[key] = options.json_types[key]
-        prop_with_flags[key + '_flag'] = 'int'
-    schema = {
-              'geometry': options.layer_type,
-              'properties': prop_with_flags,
-              }
-    feats_connected = check.check_connectivity(feats_checked,
-                                               # key=options.connectivity['key'],
-                                               # values=options.connectivity['value'],
-                                               feats_end_point,
-                                               options.connectivity['uniqueid'],
-                                               tolerance=float(options.connectivity['tolerance']),
-                                               logger=logger
-                                               )
-    logger.info('Writing filtered and checked data to GeoJSON in {:s}'.format(options.report_json))
-    props_schema = schema['properties']
-    props_schema['connected'] = 'int'
-    props_schema['endpoints'] = 'int'
-
-    # add the additional properties
-    props_schema.update(options.add_props)
-
-    schema = {
-              'geometry': options.layer_type,
-              'properties': props_schema,
-              }
-    io.write_layer(options.report_json,
-                   None,
-                   feats_connected,
-                   format='GeoJSON',
-                   write_mode='w',
-                   crs=fiona.crs.from_epsg(4326),
-                   schema=schema,
-                   logger=logger,
-                   )
+# def run_connectivity_check(options, bbox, logger):
+#     logger.info('Filtering features from {:s}'.format(options.osm_fn))
+#     logger.info('Using key: {:s} and value: {:s}'.format(options.filter['key'], str(options.filter['value'])))
+#     feats = filter.filter_features(options.osm_fn,
+#                            osm_config=options.osm_config,
+#                            key=options.filter['key'],
+#                            value=options.filter['value'],
+#                            layer_index=options.layer_index,
+#                            wgs2utm=False,
+#                            logger=logger,
+#                            bbox=None,
+#                            )
+#     # add connectivity flag to the model
+#     schema = {
+#               'geometry': options.layer_type,
+#               'properties': options.json_types
+#     }
+#     feats_checked = check.check_data_model(feats,
+#                                            check_keys=options.key_types,
+#                                            check_ranges=options.key_ranges,
+#                                            check_conditions=options.conditions,
+#                                            schema=schema,
+#                                            keep_original=True,
+#                                            add_props=options.add_props,
+#                                            logger=logger,
+#                                            )
+#     logger.info('Filtering connect features from {:s}'.format(options.connectivity['fn']))
+#     logger.info('Using key: {:s} and value: {:s}'.format(options.connectivity['key'], str(options.connectivity['value'])))
+#     feats_end_point = filter.filter_features(options.connectivity['fn'],
+#                                            osm_config=options.osm_fn,
+#                                            key=options.connectivity['key'],
+#                                            value=options.connectivity['value'],
+#                                            layer_index=options.layer_index,
+#                                            wgs2utm=False,
+#                                            logger=logger,
+#                                            bbox=None,
+#                                            )
+#     if len(feats_end_point) == 0:
+#         logger.error('No connect features are found in {:s}. Is your filter correct? {:s}: {:s}'.format(options.connectivity['fn'],
+#                                                                                                         options.connectivity['key'],
+#                                                                                                         options.connectivity['value']
+#                                                                                                         )
+#                      )
+#         sys.exit(1)
+#     prop_with_flags = {}
+#     for key in options.json_types:
+#         prop_with_flags[key] = options.json_types[key]
+#         prop_with_flags[key + '_flag'] = 'int'
+#     schema = {
+#               'geometry': options.layer_type,
+#               'properties': prop_with_flags,
+#               }
+#     feats_connected = check.check_connectivity(feats_checked,
+#                                                # key=options.connectivity['key'],
+#                                                # values=options.connectivity['value'],
+#                                                feats_end_point,
+#                                                options.connectivity['uniqueid'],
+#                                                tolerance=float(options.connectivity['tolerance']),
+#                                                logger=logger
+#                                                )
+#     logger.info('Writing filtered and checked data to GeoJSON in {:s}'.format(options.report_json))
+#     props_schema = schema['properties']
+#     props_schema['connected'] = 'int'
+#     props_schema['endpoints'] = 'int'
+#
+#     # add the additional properties
+#     props_schema.update(options.add_props)
+#
+#     schema = {
+#               'geometry': options.layer_type,
+#               'properties': props_schema,
+#               }
+#     io.write_layer(options.report_json,
+#                    None,
+#                    feats_connected,
+#                    format='GeoJSON',
+#                    write_mode='w',
+#                    crs=fiona.crs.from_epsg(4326),
+#                    schema=schema,
+#                    logger=logger,
+#                    )
 
 def run_crossings_check(options, bbox, logger=logging):
     def get_crossings_check(options, bbox, props={}, logger=logging):

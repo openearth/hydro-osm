@@ -82,7 +82,7 @@ def create_parser():
                       default='osm2dhydro.ini', nargs=1,
                       help='ini configuration file')
     parser.add_option('-c', '--check', type='choice', action='store',
-                      dest='check', choices=['data_model', 'connectivity', 'crossings'],
+                      dest='check', choices=['data_model', 'crossings'],  # 'connectivity',
                       default=None,
                       help='which check to perform, can be: data_model, connectivity, crossings')
     parser.add_option('-d', '--destination',
