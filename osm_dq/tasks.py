@@ -99,6 +99,10 @@ def run_data_model_check(options, bbox, logger=logging):
                                        bbox=bbox,
                                        )
         logger.info('{:d} features found'.format(len(all_features)))
+        if len(all_features) == 0:
+            logger.error('Could not find any features in {:s} using the key: {:s} and value: {:s}'.format(options.osm_fn, options.filter['key'], str(options.filter['value'])))
+            logger.error('Please check if your input is correct and complete. Exiting...')
+            sys.exit(1)
 
         # prepare schema
         schema = {
@@ -197,7 +201,6 @@ def run_data_model_check(options, bbox, logger=logging):
                   'geometry': options.layer_type,
                   'properties': prop_with_flags,
                   }
-
     io.write_layer(options.report_json,
                 None,
                 feats_checked,
