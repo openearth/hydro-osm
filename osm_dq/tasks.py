@@ -173,7 +173,7 @@ def run_data_model_check(options, bbox, logger=logging):
                                                    wgs2utm=False,
                                                    logger=logger,
                                                    bbox=None,
-                                                   )
+                                                               )
             if len(feats_end_point) == 0:
                 logger.warning('No connect features are found in {:s}. Skipping connectivity check'.format(options.connectivity[c_k]['fn'])
                              )

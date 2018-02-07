@@ -144,7 +144,7 @@ def add_ini(options, logger=logging):
                                                                       )
 
             options.connectivity[c_k]['uniqueid'] = configget(config,
-                                                              'connectivity',
+                                                              c_k,
                                                               'uniqueid',
                                                               '_id'
                                                               )

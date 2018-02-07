@@ -35,7 +35,6 @@ from osm_dq import tasks
 
 def main():
     options, logger, ch = config.create_options()
-
     # download openstreetmap data
     if options.osm_download:
         tasks.get_osm_data(options, logger=logger)

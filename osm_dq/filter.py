@@ -170,6 +170,8 @@ def filter_features(fn, layer_index=1, osm_config=None, bbox=None, key='waterway
     all_features = [[]]*len(bbox)
     # features = []  # output is list of features
     for n, feat in enumerate(src_lyr):
+        # if feat.GetField('fid') == 183:
+        #     import pdb;pdb.set_trace()
         geom_validity = 0
         if feat.GetGeometryRef() is None:
             logger.warning('Feature {:d} contains NULL geometry, please check this in input file'.format(n + 1))

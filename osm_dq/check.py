@@ -1,6 +1,7 @@
 """
 Functions that define the checks, typically ingest a list of features, and objects to check against
 """
+import sys
 import copy
 import rtree
 import shapely
@@ -185,6 +186,16 @@ def check_connectivity(feats, feats_end_point, connect_name, uniqueid, tolerance
     Returns:
         feats: list of JSON-type features with 'properties' containing the connected flag (id)
     """
+    # first check if each point feature contains a unique id which is non-zero.
+    collect_uniqueids = [f['properties'][uniqueid] for f in feats_end_point]
+    # check for zeros
+    if 0 in collect_uniqueids:
+        logger.error('Connect features unique id "{:s}" contains zero values. Make sure the values are unique non-zero'.format(uniqueid))
+        sys.exit(1)
+    # check for non-uniqueness
+    if len(np.unique(collect_uniqueids)) < len(collect_uniqueids):
+        logger.warning('Connect features unique id "{:s}" contains non-unique values. We can continue, but do make sure the values are unique and non-zero'.format(uniqueid))
+
     end_name = connect_name + '_points'
     feats_ = copy.copy(feats)
     logger.info('Checking the connectivity...')
@@ -254,9 +265,10 @@ def check_connectivity(feats, feats_end_point, connect_name, uniqueid, tolerance
                         continue
             endpoints_list = [j for j, feat in enumerate(feats_) if feat['properties'][end_name] > 0]
             to_check = len(endpoints_list)
+        if feats_[select_id]['properties']['_id'] == 49273:  ## this one does not seem to work
+            import pdb; pdb.set_trace()
 
     return feats_
-
 
 def check_crossings(feats_1, feats_2, key_bridge, value_bridge, key_tunnel, value_tunnel, props={}, logger=logging):
     """
