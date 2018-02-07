@@ -189,12 +189,12 @@ def check_connectivity(feats, feats_end_point, connect_name, uniqueid, tolerance
     # first check if each point feature contains a unique id which is non-zero.
     collect_uniqueids = [f['properties'][uniqueid] for f in feats_end_point]
     # check for zeros
-    if 0 in collect_uniqueids:
-        logger.error('Connect features unique id "{:s}" contains zero values. Make sure the values are unique non-zero'.format(uniqueid))
+    if 0 in collect_uniqueids or None in collect_uniqueids:
+        logger.error('Connect features unique id "{:s}" contains zero or null values. Make sure the values in "{:s}" are unique non-zero'.format(uniqueid, uniqueid))
         sys.exit(1)
     # check for non-uniqueness
     if len(np.unique(collect_uniqueids)) < len(collect_uniqueids):
-        logger.warning('Connect features unique id "{:s}" contains non-unique values. We can continue, but do make sure the values are unique and non-zero'.format(uniqueid))
+        logger.warning('Connect features unique id "{:s}" contains non-unique values. We continue...'.format(uniqueid))
 
     end_name = connect_name + '_points'
     feats_ = copy.copy(feats)
@@ -265,8 +265,6 @@ def check_connectivity(feats, feats_end_point, connect_name, uniqueid, tolerance
                         continue
             endpoints_list = [j for j, feat in enumerate(feats_) if feat['properties'][end_name] > 0]
             to_check = len(endpoints_list)
-        if feats_[select_id]['properties']['_id'] == 49273:  ## this one does not seem to work
-            import pdb; pdb.set_trace()
 
     return feats_
 
